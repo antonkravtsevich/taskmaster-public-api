@@ -6,8 +6,7 @@ import os
 
 app = Flask(__name__)
 CORS(app)
-# SA_SERVICE_HOST = os.environ.get('SA_SERVICE_HOST', 'localhost')
-SA_SERVICE_HOST = '188.166.115.138'
+SA_SERVICE_HOST = os.environ.get('SA_SERVICE_HOST', 'localhost')
 MONGODB_HOST = os.environ.get('MONGODB_HOST', 'localhost')
 MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'tmdata')
 
@@ -24,7 +23,7 @@ posts = db['posts']
 
 def get_polarity(text):
     dict_to_send={'raw_text':text}
-    res = requests.post('http://'+SA_SERVICE_HOST+':31206', json=dict_to_send)
+    res = requests.post('http://'+SA_SERVICE_HOST+':5000', json=dict_to_send)
     print(res)
     json = res.json()
     return(json['polarity'])
