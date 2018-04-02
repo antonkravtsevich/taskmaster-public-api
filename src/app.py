@@ -38,11 +38,14 @@ def check_request(request, fields):
             errors.append('Field "{}" is missing'.format(field['name']))
         else:
             if type(request.json[field['name']]) is not field['type']:
-                errors.append('Field "{}" must be {}'.format(field['name'], field['type']))
+                errors.append('Field "{}" must be {}, current: {}'.format(field['name'], 
+                                                                          field['type'], 
+                                                                          type(request.json[field['name']])))
     return errors
 
 
 def get_collection():
+    print('Create database connection...')
     try:
         client = MongoClient(MONGODB_HOST, 27017)
     except:
@@ -51,6 +54,7 @@ def get_collection():
 
     db = client[MONGODB_DATABASE]
     posts = db['posts']
+    print('Successfully connect to database')
     return posts
 
 
