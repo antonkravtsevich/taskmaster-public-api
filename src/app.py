@@ -4,6 +4,7 @@ from flask_cors import CORS
 import os
 from pymongo import MongoClient
 import requests
+from datetime import datetime
 
 ENV = os.environ.get('ENV', 'production')
 if ENV == 'test':
@@ -18,6 +19,7 @@ MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'tmdata')
 
 app = flask.Flask(__name__)
 CORS(app)
+startTime = datetime.now()
 
 
 def resp(code, data):
@@ -81,10 +83,13 @@ def get_posts_from_database(collection, theme=None):
     return result
 
 
-@app.route('/get_env_var', methods=['GET'])
+@app.route('/status', methods=['GET'])
 def get_env_var():
-    text = 'SA_SERVICE_HOST: {}\n'.format(SA_SERVICE_HOST)
-    text += 'MONGODB_HOST: {}\n'.format(MONGODB_HOST)
+    currTime = datetime.now()
+    text = 'Uptime: {}<br><br>'.format(currTime - startTime)
+    text += 'SA_SERVICE_HOST: {}<br>'.format(SA_SERVICE_HOST)
+    text += 'MONGODB_HOST: {}'.format(MONGODB_HOST)
+    return(text, 200)
 
 
 @app.route('/posts', methods=['POST'])
