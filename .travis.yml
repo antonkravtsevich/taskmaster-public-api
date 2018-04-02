@@ -2,6 +2,7 @@ sudo: required
 
 services:
   - docker
+  - mongodb
 
 language: python
 python:
@@ -9,6 +10,8 @@ python:
 cache: pip
 install:
   - pip install -r requirements.txt
+script:
+  - python test.py
 notifications: 
   email: false
 
