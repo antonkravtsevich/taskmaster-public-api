@@ -66,7 +66,7 @@ def get_polarity(text):
     return(json['polarity'])
 
 
-def add_to_database(collection, theme, text, polarity):
+def add_to_database(collection, timestamp, theme, text, polarity):
     post={'theme':theme, 'text':text, 'polarity':polarity}
     try:
         collection.insert_one(post)
@@ -100,16 +100,18 @@ def get_env_var():
 def add_new_post():
     required_fileds = [
         {'name': 'text', 'type': str},
-        {'name': 'theme', 'type': str}
+        {'name': 'theme', 'type': str},
+        {'name': 'timestamp', 'type': str}
     ]
     errors = check_request(request=request, fields=required_fileds)
     if errors:
         return resp(code=400, data={'status':'error', 'errors':errors})
     
+    timestamp = request.json['timestamp']
     theme = request.json['theme']
     text = request.json['text']
     polarity = get_polarity(text)
-    add_to_database(collection=app.config['collection'], theme=theme, text=text, polarity=polarity)
+    add_to_database(collection=app.config['collection'], timestamp=timestamp, theme=theme, text=text, polarity=polarity)
     return(jsonify({'status': 'ok'}), 200)
 
 
