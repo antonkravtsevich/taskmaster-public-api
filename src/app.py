@@ -66,8 +66,8 @@ def get_polarity(text):
     return(json['polarity'])
 
 
-def add_to_database(collection, timestamp, theme, text, polarity):
-    post={'theme':theme, 'text':text, 'polarity':polarity}
+def add_to_database(collection, timestamp, text, polarity):
+    post={'timestamp':timestamp, 'text':text, 'polarity':polarity}
     try:
         collection.insert_one(post)
     except:
@@ -77,7 +77,7 @@ def add_to_database(collection, timestamp, theme, text, polarity):
 
 def get_posts_from_database(collection, theme=None):
     if theme:
-        result_cursor = collection.find({'theme':theme})
+        result_cursor = collection.find({'text':{'$regex':theme}})
     else:
         result_cursor = collection.find()
     result = []
@@ -100,7 +100,6 @@ def get_env_var():
 def add_new_post():
     required_fileds = [
         {'name': 'text', 'type': str},
-        {'name': 'theme', 'type': str},
         {'name': 'timestamp', 'type': str}
     ]
     errors = check_request(request=request, fields=required_fileds)
@@ -108,10 +107,9 @@ def add_new_post():
         return resp(code=400, data={'status':'error', 'errors':errors})
     
     timestamp = request.json['timestamp']
-    theme = request.json['theme']
     text = request.json['text']
     polarity = get_polarity(text)
-    add_to_database(collection=app.config['collection'], timestamp=timestamp, theme=theme, text=text, polarity=polarity)
+    add_to_database(collection=app.config['collection'], timestamp=timestamp, text=text, polarity=polarity)
     return(jsonify({'status': 'ok'}), 200)
 
 
@@ -122,6 +120,8 @@ def get_posts_by_theme(theme):
 
 
 def main():
+    if ENV=="test":
+        print('Test environment')
     app.config['collection'] = get_collection()
     app.run(host='0.0.0.0', port=8080)
 
