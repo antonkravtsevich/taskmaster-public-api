@@ -77,7 +77,8 @@ def add_to_database(collection, timestamp, text, polarity):
 
 def get_posts_from_database(collection, theme=None):
     if theme:
-        result_cursor = collection.find({'text':{'$regex':theme}})
+        low_theme = str(theme).lower()
+        result_cursor = collection.find({'text':{'$regex':low_theme, '$options':'i'}})
     else:
         result_cursor = collection.find()
     result = []
@@ -113,8 +114,10 @@ def add_new_post():
     return(jsonify({'status': 'ok'}), 200)
 
 
-@app.route('/posts/<theme>', methods=['GET'])
-def get_posts_by_theme(theme):
+@app.route('/posts', methods=['GET'])
+def get_posts_by_theme():
+    theme = flask.request.args.get('theme', '')
+    theme = theme.replace('+', ' ')
     result = get_posts_from_database(collection=app.config['collection'], theme=theme)
     return(jsonify({'status':'ok', 'result':result}), 200)
 
