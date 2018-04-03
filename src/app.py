@@ -3,8 +3,10 @@ from flask import jsonify, request
 from flask_cors import CORS
 import os
 from pymongo import MongoClient
+from pymongo import DESCENDING as DESC
 import requests
 from datetime import datetime
+import pandas as pd
 
 ENV = os.environ.get('ENV', 'production')
 if ENV == 'test':
@@ -74,8 +76,8 @@ def add_to_database(collection, timestamp, text, polarity):
     post={'timestamp':timestamp, 'text':text, 'polarity':polarity}
     try:
         collection.insert_one(post)
-    except:
-        print('error in add to mongo')
+    except Exception as e:
+        print('error in add to mongo: str(e)')
         os._exit(1)
 
 
@@ -96,28 +98,24 @@ def get_posts_from_database(collection, theme=None):
 # get polarity variables of theme
 def get_polarity_from_database(collection, theme):
     low_theme = str(theme).lower()
-    result_cursor = collection.find({'text':{'$regex':low_theme, '$options':'i'}})
-    polarity_sum = 0
-    tweets_count = 0
-    positive_tweets_count=0
-    negative_tweets_count=0
-    neutral_tweets_count=0
-    for doc in result_cursor:
-        tweets_count+=1
-        doc_polarity = doc['polarity']
-        polarity_sum += doc['polarity']
-        if doc_polarity == 0.0:
-            neutral_tweets_count+=1
-        if doc_polarity > 0.0:
-            positive_tweets_count+=1
-        if doc_polarity < 0.0:
-            negative_tweets_count+=1
+    result_cursor = collection.find({'text':{'$regex':low_theme, '$options':'i'}}).sort([('timestamp', DESC)]).limit(1000)
+    
+    df = pd.DataFrame(list(result_cursor))
+    df.sort_values('timestamp', inplase=True)
+    df['polarity_smoothed'] = df['polarity'].rolling(int(len(df)/5)).mean()
+
+    polarity_mean = df['polarity'].mean()
+    positive_tweets_count=len(df[df['polarity']>0])
+    negative_tweets_count=len(df[df['polarity']<0])
+    neutral_tweets_count=len(df[df['polarity']==0.0])
+    polarity=df['polarity_smoothed'].tolist()
+
     result={
-        'tweets_count':tweets_count,
-        'polarity_sum':polarity_sum,
+        'polarity_mean':polarity_mean,
         'neutral_tweets_count':neutral_tweets_count,
         'positive_tweets_count':positive_tweets_count,
-        'negative_tweets_count':negative_tweets_count
+        'negative_tweets_count':negative_tweets_count,
+        'polarity':polarity
     }
     return(result)
 
