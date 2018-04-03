@@ -26,6 +26,7 @@ def resp(code, data):
     return (jsonify(data), code)
 
 
+# using dict of required fields and their types to validate request
 def check_request(request, fields):
     errors = []
     if not request.json:
@@ -44,6 +45,7 @@ def check_request(request, fields):
     return errors
 
 
+# get tweets collection from database
 def get_collection():
     print('Create database connection...')
     try:
@@ -58,6 +60,7 @@ def get_collection():
     return posts
 
 
+# request polarity count for sentimental analyzer service
 def get_polarity(text):
     dict_to_send={'raw_text':text}
     res = requests.post('http://'+SA_SERVICE_HOST+':'+SA_SERVICE_PORT, json=dict_to_send)
@@ -66,6 +69,7 @@ def get_polarity(text):
     return(json['polarity'])
 
 
+# add new record to database
 def add_to_database(collection, timestamp, text, polarity):
     post={'timestamp':timestamp, 'text':text, 'polarity':polarity}
     try:
@@ -75,6 +79,7 @@ def add_to_database(collection, timestamp, text, polarity):
         os._exit(1)
 
 
+# get posts from database (using theme)
 def get_posts_from_database(collection, theme=None):
     if theme:
         low_theme = str(theme).lower()
@@ -86,6 +91,35 @@ def get_posts_from_database(collection, theme=None):
         del doc['_id']
         result.append(doc)
     return result
+
+
+# get polarity variables of theme
+def get_polarity_from_database(collection, theme):
+    low_theme = str(theme).lower()
+    result_cursor = collection.find({'text':{'$regex':low_theme, '$options':'i'}})
+    polarity_sum = 0
+    tweets_count = 0
+    positive_tweets_count=0
+    negative_tweets_count=0
+    neutral_tweets_count=0
+    for doc in result_cursor:
+        tweets_count+=1
+        doc_polarity = doc['polarity']
+        polarity_sum += doc['polarity']
+        if doc_polarity == 0.0:
+            neutral_tweets_count+=1
+        if doc_polarity > 0.0:
+            positive_tweets_count+=1
+        if doc_polarity < 0.0:
+            negative_tweets_count+=1
+    result={
+        'tweets_count':tweets_count,
+        'polarity_sum':polarity_sum,
+        'neutral_tweets_count':neutral_tweets_count,
+        'positive_tweets_count':positive_tweets_count,
+        'negative_tweets_count':negative_tweets_count
+    }
+    return(result)
 
 
 @app.route('/status', methods=['GET'])
@@ -119,6 +153,14 @@ def get_posts_by_theme():
     theme = flask.request.args.get('theme', '')
     theme = theme.replace('+', ' ')
     result = get_posts_from_database(collection=app.config['collection'], theme=theme)
+    return(jsonify({'status':'ok', 'result':result}), 200)
+
+
+@app.route('/polarity', methods=['GET'])
+def get_polarity_by_theme():
+    theme = flask.request.args.get('theme', '')
+    theme = theme.replace('+', ' ')
+    result = get_polarity_from_database(collection=app.config['collection'], theme=theme)
     return(jsonify({'status':'ok', 'result':result}), 200)
 
 
