@@ -95,7 +95,6 @@ def get_posts_from_database(collection, theme=None):
     return result
 
 
-# get polarity variables of theme
 def get_polarity_from_database(collection, theme):
     low_theme = str(theme).lower()
     result_cursor = collection.find({'text':{'$regex':low_theme, '$options':'i'}}).sort([('timestamp', DESC)]).limit(1000)
