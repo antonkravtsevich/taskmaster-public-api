@@ -12,11 +12,14 @@ ENV = os.environ.get('ENV', 'production')
 if ENV == 'test':
     SA_SERVICE_PORT = '31206'
     SA_SERVICE_HOST = '188.166.115.138'
+    MONGODB_PORT = 31178
+    MONGODB_HOST = '188.166.115.138'
 else:
     SA_SERVICE_PORT = '5000'
     SA_SERVICE_HOST = os.environ.get('SA_SERVICE_HOST', 'localhost')
+    MONGODB_PORT = 27017
+    MONGODB_HOST = os.environ.get('MONGODB_HOST', 'localhost')
 
-MONGODB_HOST = os.environ.get('MONGODB_HOST', 'localhost')
 MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'tmdata')
 
 app = flask.Flask(__name__)
@@ -51,7 +54,7 @@ def check_request(request, fields):
 def get_collection():
     print('Create database connection...')
     try:
-        client = MongoClient(MONGODB_HOST, 27017)
+        client = MongoClient(MONGODB_HOST, MONGODB_PORT)
     except:
         print("Can't create connection")
         os._exit(1)
@@ -77,7 +80,7 @@ def add_to_database(collection, timestamp, text, polarity):
     try:
         collection.insert_one(post)
     except Exception as e:
-        print('error in add to mongo: str(e)')
+        print('error in add to mongo: {}'.format(str(e)))
         os._exit(1)
 
 
@@ -98,10 +101,11 @@ def get_posts_from_database(collection, theme=None):
 def get_polarity_from_database(collection, theme):
     low_theme = str(theme).lower()
     result_cursor = collection.find({'text':{'$regex':low_theme, '$options':'i'}}).sort([('timestamp', DESC)]).limit(1000)
-    
+
     df = pd.DataFrame(list(result_cursor))
-    df.sort_values('timestamp', inplase=True)
+    df.sort_values('timestamp', inplace=True)
     df['polarity_smoothed'] = df['polarity'].rolling(int(len(df)/5)).mean()
+    df.dropna(inplace=True)
 
     polarity_mean = df['polarity'].mean()
     positive_tweets_count=len(df[df['polarity']>0])
