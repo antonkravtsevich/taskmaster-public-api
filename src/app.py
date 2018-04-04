@@ -106,21 +106,32 @@ def get_polarity_from_database(collection, theme):
     df.sort_values('timestamp', inplace=True)
     df['polarity_smoothed'] = df['polarity'].rolling(int(len(df)/5)).mean()
     df.dropna(inplace=True)
-
-    polarity_mean = df['polarity'].mean()
-    positive_tweets_count=len(df[df['polarity']>0])
-    negative_tweets_count=len(df[df['polarity']<0])
-    neutral_tweets_count=len(df[df['polarity']==0.0])
     polarity=df['polarity_smoothed'].tolist()
     timestamps=df['timestamp'].tolist()
 
     result={
-        'polarity_mean':polarity_mean,
+        'polarity':polarity,
+        'timestamps':timestamps
+    }
+    return(result)
+
+
+def get_percentage_from_database(collection, theme):
+    low_theme = str(theme).lower()
+    result_cursor = collection.find({'text':{'$regex':low_theme, '$options':'i'}}).sort([('timestamp', DESC)]).limit(500)
+
+    df = pd.DataFrame(list(result_cursor))
+    df.sort_values('timestamp', inplace=True)
+    df.dropna(inplace=True)
+
+    positive_tweets_count=len(df[df['polarity']>0])
+    negative_tweets_count=len(df[df['polarity']<0])
+    neutral_tweets_count=len(df[df['polarity']==0.0])
+
+    result={
         'neutral_tweets_count':neutral_tweets_count,
         'positive_tweets_count':positive_tweets_count,
         'negative_tweets_count':negative_tweets_count,
-        'polarity':polarity,
-        'timestamps':timestamps
     }
     return(result)
 
@@ -164,6 +175,14 @@ def get_polarity_by_theme():
     theme = flask.request.args.get('theme', '')
     theme = theme.replace('+', ' ')
     result = get_polarity_from_database(collection=app.config['collection'], theme=theme)
+    return(jsonify({'status':'ok', 'result':result}), 200)
+
+
+@app.route('/percentage', methods=['GET'])
+def get_percentage_by_theme():
+    theme = flask.request.args.get('theme', '')
+    theme = theme.replace('+', ' ')
+    result = get_percentage_from_database(collection=app.config['collection'], theme=theme)
     return(jsonify({'status':'ok', 'result':result}), 200)
 
 
