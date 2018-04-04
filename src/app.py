@@ -112,13 +112,15 @@ def get_polarity_from_database(collection, theme):
     negative_tweets_count=len(df[df['polarity']<0])
     neutral_tweets_count=len(df[df['polarity']==0.0])
     polarity=df['polarity_smoothed'].tolist()
+    timestamps=df['timestamp'].tolist()
 
     result={
         'polarity_mean':polarity_mean,
         'neutral_tweets_count':neutral_tweets_count,
         'positive_tweets_count':positive_tweets_count,
         'negative_tweets_count':negative_tweets_count,
-        'polarity':polarity
+        'polarity':polarity,
+        'timestamps':timestamps
     }
     return(result)
 
