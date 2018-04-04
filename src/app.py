@@ -100,7 +100,7 @@ def get_posts_from_database(collection, theme=None):
 
 def get_polarity_from_database(collection, theme):
     low_theme = str(theme).lower()
-    result_cursor = collection.find({'text':{'$regex':low_theme, '$options':'i'}}).sort([('timestamp', DESC)]).limit(1000)
+    result_cursor = collection.find({'text':{'$regex':low_theme, '$options':'i'}}).sort([('timestamp', DESC)]).limit(500)
 
     df = pd.DataFrame(list(result_cursor))
     df.sort_values('timestamp', inplace=True)
