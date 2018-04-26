@@ -9,6 +9,8 @@ class ThematicModeller:
 
     def get_themes(self, text):
         dict_to_send = {'raw_text': text}
+        print('dict to send: {}'.format(dict_to_send))
+        print('address: {}'.format('http://' + self.host + ':' + str(self.port) + '/get_themes'))
         res = requests.post(
             'http://' + self.host + ':' + str(self.port) + '/get_themes',
             json=dict_to_send
