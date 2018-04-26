@@ -10,6 +10,7 @@ from clients import Clients
 from tm import ThematicModeller
 from sa import SentimentalAnalyzer
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 app.debug = True
@@ -37,6 +38,7 @@ MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'tmdata')
 
 db = DBWorker('localhost', 27017, 'taskmaster')
 clients = Clients(db)
+startTime = datetime.now()
 
 tm = ThematicModeller(host=TM_SERVICE_HOST, port=TM_SERVICE_PORT)
 sa = SentimentalAnalyzer(host=SA_SERVICE_HOST, port=SA_SERVICE_PORT)
@@ -178,6 +180,13 @@ def get_average_polaritys():
     return resp(
         data={'status': 'ok', 'polaritys': average_polaritys},
         code=200)
+
+
+@app.route('/status', methods=['GET'])
+def get_status():
+    currTime = datetime.now()
+    response = 'Uptime: {}'.format(currTime - startTime)
+    return(response)
 
 
 if __name__ == '__main__':
