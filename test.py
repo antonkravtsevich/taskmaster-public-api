@@ -89,7 +89,8 @@ class TestAPI(unittest.TestCase):
                     'theme_number': 2,
                     'theme_assesments': [0.2, 0.4]
                 }
-            ]
+            ],
+            'client_name': 'test_client'
         }
         db.clean_database()
         self.assertEqual(user, test_user)
@@ -218,7 +219,7 @@ class TestAPI(unittest.TestCase):
                 'theme_conformity': 1.0
             }
         ]
-        predictions = db.predict(themes3)
+        predictions = db.predict(themes3, client_name='test_client')
         test_predictions = [
             {
                 'user_id': 1,
