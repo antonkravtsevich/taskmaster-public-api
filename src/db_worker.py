@@ -8,7 +8,7 @@ class DBWorker(object):
 
     def __init__(self, host, port, database_name):
         try:
-            self.mongo_client = MongoClient(host, port)
+            self.mongo_client = MongoClient(host, port, serverSelectionTimeoutMS=1000)
         except ConnectionFailure:
             print("Can't create connection")
             os._exit(1)
@@ -17,6 +17,13 @@ class DBWorker(object):
         self.posts = self.db['posts']
         self.users = self.db['users']
         self.comments = self.db['comments']
+
+    def get_status_ok(self):
+        try:
+            self.mongo_client.admin.command('ismaster')
+            return True
+        except ConnectionFailure:
+            return False
 
     # test function
     def clean_database(self):
@@ -135,9 +142,11 @@ class DBWorker(object):
         return assesments
 
     def predict(self, post_themes):
+        print('post_themes: {}'.format(post_themes))
         users = self.get_users_assesments()
         predictions = []
         for user in users:
+            print('user assesments: {}'.format(user['assesments']))
             assesments = []
             for u_theme in user['assesments']:
                 u_t_number = u_theme['theme_number']

@@ -6,6 +6,13 @@ class ThematicModeller:
     def __init__(self, host, port):
         self.host = host
         self.port = port
+    
+    def get_status_ok(self):
+        try:
+            res = requests.get('http://' + self.host + ':' + str(self.port) + '/status')
+            return True
+        except requests.exceptions.ConnectionError as e:
+            return False
 
     def get_themes(self, text):
         dict_to_send = {'raw_text': text}
@@ -16,6 +23,7 @@ class ThematicModeller:
             json=dict_to_send
         )
         json = res.json()
+        print('TM get_temes 200')
         return json['themes']
 
     def get_theme_words(self, theme_number):
@@ -25,4 +33,5 @@ class ThematicModeller:
             json=dict_to_send
         )
         json = res.json()
+        print('TM get_theme_words 200')
         return json['words']

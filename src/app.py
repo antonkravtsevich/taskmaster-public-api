@@ -26,7 +26,7 @@ if ENV == 'test':
     SA_SERVICE_HOST = '188.166.115.138'
     SA_SERVICE_PORT = 31206
     TM_SERVICE_HOST = '188.166.115.138'
-    TM_SERVICE_PORT = 32356
+    TM_SERVICE_PORT = 30962
     MONGODB_HOST = '188.166.115.138'
     MONGODB_PORT = 31178
 else:
@@ -38,7 +38,7 @@ else:
     MONGODB_PORT = 27017
 MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'tmdata')
 
-db = DBWorker('localhost', 27017, 'taskmaster')
+db = DBWorker(MONGODB_HOST, MONGODB_PORT, 'taskmaster')
 clients = Clients(db)
 startTime = datetime.now()
 
@@ -187,8 +187,25 @@ def get_average_polaritys():
 @app.route('/status', methods=['GET'])
 def get_status():
     currTime = datetime.now()
-    response = 'Uptime: {}'.format(currTime - startTime)
+    SA_status_ok = sa.get_status_ok()
+    TM_status_ok = tm.get_status_ok()
+    DB_status_ok = db.get_status_ok()
+    response = 'Uptime: {}<br>'.format(currTime - startTime)
+    response += 'SA service status: {}<br>'.format(generate_status_output(SA_status_ok))
+    response += 'TM service status: {}<br>'.format(generate_status_output(TM_status_ok))
+    response += 'DB service status: {}<br>'.format(generate_status_output(DB_status_ok))
     return(response)
+
+@app.route('/clean_database_test_request', methods=['GET'])
+def clean_database_test_request():
+    db.clean_database()
+    return('database cleaned')
+
+def generate_status_output(is_ok):
+    if is_ok:
+        return '<font color="green">OK</font>'
+    else:
+        return '<font color="red">NOT OK</font>'
 
 
 if __name__ == '__main__':
