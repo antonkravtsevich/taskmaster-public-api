@@ -72,11 +72,11 @@ class TestAPI(unittest.TestCase):
                 'theme_conformity': 0.8
             }
         ]
-        db.add_new_post(post_id=1, post_themes=themes1)
-        db.add_new_post(post_id=2, post_themes=themes2)
-        db.update_user_prefrences(user_id=1, post_id=1, polarity=0.5)
-        db.update_user_prefrences(user_id=1, post_id=2, polarity=0.5)
-        user = db.get_user_by_id(user_id=1)
+        db.add_new_post(post_id=1, post_themes=themes1, client_name='test_client')
+        db.add_new_post(post_id=2, post_themes=themes2, client_name='test_client')
+        db.update_user_prefrences(user_id=1, post_id=1, polarity=0.5, client_name='test_client')
+        db.update_user_prefrences(user_id=1, post_id=2, polarity=0.5, client_name='test_client')
+        user = db.get_user_by_id(user_id=1, client_name='test_client')
         del(user['_id'])
         test_user = {
             'user_id': 1,
@@ -114,11 +114,11 @@ class TestAPI(unittest.TestCase):
                 'theme_conformity': 0.8
             }
         ]
-        db.add_new_post(post_id=1, post_themes=themes3)
-        db.add_new_post(post_id=2, post_themes=themes4)
-        db.update_user_prefrences(user_id=1, post_id=1, polarity=0.5)
-        db.update_user_prefrences(user_id=1, post_id=2, polarity=0.5)
-        user = db.get_user_by_id(1)
+        db.add_new_post(post_id=1, post_themes=themes3, client_name='test_client')
+        db.add_new_post(post_id=2, post_themes=themes4, client_name='test_client')
+        db.update_user_prefrences(user_id=1, post_id=1, polarity=0.5, client_name='test_client')
+        db.update_user_prefrences(user_id=1, post_id=2, polarity=0.5, client_name='test_client')
+        user = db.get_user_by_id(1, client_name='test_client')
         assesment = db.count_user_assesments(user=user)
         test_assesment = [
             {
@@ -153,12 +153,12 @@ class TestAPI(unittest.TestCase):
                 'theme_conformity': 0.8
             }
         ]
-        db.add_new_post(post_id=1, post_themes=themes1)
-        db.add_new_post(post_id=2, post_themes=themes2)
-        db.update_user_prefrences(user_id=1, post_id=1, polarity=0.5)
-        db.update_user_prefrences(user_id=1, post_id=2, polarity=0.5)
-        db.update_user_prefrences(user_id=2, post_id=2, polarity=1)
-        assesments = db.get_users_assesments()
+        db.add_new_post(post_id=1, post_themes=themes1, client_name='test_client')
+        db.add_new_post(post_id=2, post_themes=themes2, client_name='test_client')
+        db.update_user_prefrences(user_id=1, post_id=1, polarity=0.5, client_name='test_client')
+        db.update_user_prefrences(user_id=1, post_id=2, polarity=0.5, client_name='test_client')
+        db.update_user_prefrences(user_id=2, post_id=2, polarity=1, client_name='test_client')
+        assesments = db.get_users_assesments(client_name='test_client')
         test_assesments = [
             {
                 'user_id': 1,
@@ -207,11 +207,11 @@ class TestAPI(unittest.TestCase):
                 'theme_conformity': 0.8
             }
         ]
-        db.add_new_post(post_id=1, post_themes=themes1)
-        db.add_new_post(post_id=2, post_themes=themes2)
-        db.update_user_prefrences(user_id=1, post_id=1, polarity=0.5)
-        db.update_user_prefrences(user_id=1, post_id=2, polarity=0.5)
-        db.update_user_prefrences(user_id=2, post_id=2, polarity=1)
+        db.add_new_post(post_id=1, post_themes=themes1, client_name='test_client')
+        db.add_new_post(post_id=2, post_themes=themes2, client_name='test_client')
+        db.update_user_prefrences(user_id=1, post_id=1, polarity=0.5, client_name='test_client')
+        db.update_user_prefrences(user_id=1, post_id=2, polarity=0.5, client_name='test_client')
+        db.update_user_prefrences(user_id=2, post_id=2, polarity=1, client_name='test_client')
         themes3 = [
             {
                 'theme_number': 1,
@@ -244,7 +244,7 @@ class TestAPI(unittest.TestCase):
                     'theme_number': 1,
                     'theme_conformity': 1.0
                 }
-            ]
+            ], client_name='test_client'
         )
         db.add_new_post(
             post_id=2,
@@ -253,19 +253,21 @@ class TestAPI(unittest.TestCase):
                     'theme_number': 2,
                     'theme_conformity': 1.0
                 }
-            ]
+            ], client_name='test_client'
         )
         db.add_new_comment(
             post_id=1,
             user_id=1,
             comment_id=1,
-            text_polarity=1.0)
+            text_polarity=1.0, 
+            client_name='test_client')
         db.add_new_comment(
             post_id=2,
             user_id=1,
             comment_id=2,
-            text_polarity=1.0)
-        avg_polarity = db.get_user_average_polarity(user_id=1)
+            text_polarity=1.0,
+             client_name='test_client')
+        avg_polarity = db.get_user_average_polarity(user_id=1, client_name='test_client')
         db.clean_database()
         self.assertEqual(avg_polarity, 1.0)
 
@@ -279,7 +281,7 @@ class TestAPI(unittest.TestCase):
                     'theme_number': 1,
                     'theme_conformity': 1.0
                 }
-            ]
+            ], client_name='test_client'
         )
         db.add_new_post(
             post_id=2,
@@ -288,19 +290,21 @@ class TestAPI(unittest.TestCase):
                     'theme_number': 2,
                     'theme_conformity': 1.0
                 }
-            ]
+            ], client_name='test_client'
         )
         db.add_new_comment(
             post_id=1,
             user_id=1,
             comment_id=1,
-            text_polarity=1.0)
+            text_polarity=1.0,
+            client_name='test_client')
         db.add_new_comment(
             post_id=2,
             user_id=1,
             comment_id=2,
-            text_polarity=1.0)
-        polaritys = db.get_users_average_polarityes()
+            text_polarity=1.0,
+            client_name='test_client')
+        polaritys = db.get_users_average_polarityes(client_name='test_client')
         test_polaritys = [
             {
                 'user_id': 1,

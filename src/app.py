@@ -85,26 +85,42 @@ def login():
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
 
-    username = request.json.get('username', None)
+    client_name = request.json.get('client_name', None)
     password = request.json.get('password', None)
-    if not username:
-        return jsonify({"msg": "Missing username parameter"}), 400
+    if not client_name:
+        return jsonify({"msg": "Missing client name parameter"}), 400
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
-    client = clients.authenticate(username, password)
+    client = clients.authenticate(client_name, password)
     if not client:
-        return jsonify({"msg": "Bad username or password"}), 401
-
-    access_token = create_access_token(identity=username)
+        return jsonify({"msg": "Bad client name or password"}), 401
+    access_token = create_access_token(identity=client_name)
     return jsonify(access_token=access_token), 200
 
 
-@app.route('/test_auth', methods=['GET'])
+@app.route('/registration', methods=['POST'])
+def registration():
+    if not request.is_json:
+        return jsonify({"msg": "Missing JSON in request"}), 400
+    client_name = request.json.get('client_name', None)
+    password = request.json.get('password', None)
+    if not client_name:
+        return jsonify({"msg": "Missing client_name parameter"}), 400
+    if not password:
+        return jsonify({"msg": "Missing password parameter"}), 400
+    res = clients.registration(client_name=client_name, password=password)
+    if not res:
+        return resp(data={'status': 'ok'}, code=200)
+    else:
+        return resp(data={'status': 'error', 'error': res}, code=400)
+
+
+@app.route('/test_auth', methods=['POST'])
 @jwt_required
 def protected():
-    current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
+    client_name = get_jwt_identity()
+    return jsonify(logged_in_as=client_name), 200
 
 
 # create response
@@ -113,6 +129,7 @@ def resp(code, data):
 
 
 @app.route('/add_post', methods=['POST'])
+@jwt_required
 def add_post():
     required_fileds = [
         {'name': 'post_id', 'type': str},
@@ -121,17 +138,18 @@ def add_post():
     errors = check_request(request=request, fields=required_fileds)
     if errors:
         return resp(code=400, data={'status': 'error', 'errors': errors})
-
     post_id = request.json['post_id']
     text = request.json['text']
     post_themes = tm.get_themes(text)
-    result = db.add_new_post(post_id=post_id, post_themes=post_themes)
+    client_name = get_jwt_identity()
+    result = db.add_new_post(post_id=post_id, post_themes=post_themes, client_name=client_name)
     if result:
         return resp(data={'status': 'error', 'error': result}, code=404)
     return resp(data={'status': 'ok'}, code=200)
 
 
 @app.route('/add_comment', methods=['POST'])
+@jwt_required
 def add_comment():
     required_fileds = [
         {'name': 'comment_id', 'type': str},
@@ -142,7 +160,7 @@ def add_comment():
     errors = check_request(request=request, fields=required_fileds)
     if errors:
         return resp(code=400, data={'status': 'error', 'errors': errors})
-
+    client_name=get_jwt_identity()
     comment_id = request.json['comment_id']
     post_id = request.json['post_id']
     user_id = request.json['user_id']
@@ -153,7 +171,8 @@ def add_comment():
         post_id=post_id,
         user_id=user_id,
         comment_id=comment_id,
-        text_polarity=text_polarity
+        text_polarity=text_polarity,
+        client_name=client_name
     )
     if result:
         return resp({'status': 'error', 'error': result}, 404)
@@ -161,6 +180,7 @@ def add_comment():
 
 
 @app.route('/predict', methods=['POST'])
+@jwt_required
 def predict():
     required_fileds = [
         {'name': 'text', 'type': str}
@@ -168,24 +188,28 @@ def predict():
     errors = check_request(request=request, fields=required_fileds)
     if errors:
         return resp(code=400, data={'status': 'error', 'errors': errors})
-
+    client_name = get_jwt_identity()
     text = request.json['text']
     text_themes = tm.get_themes(text)
-    predictions = db.predict(text_themes)
+    predictions = db.predict(text_themes, client_name)
     return resp(data={'status': 'ok', 'predictions': predictions}, code=200)
 
 
 @app.route('/get_users_assesments', methods=['GET'])
+@jwt_required
 def get_average_assesments():
-    average_assesments = db.get_users_assesments()
+    client_name = get_jwt_identity()
+    average_assesments = db.get_users_assesments(client_name=client_name)
     return resp(
         data={'status': 'ok', 'assesments': average_assesments},
         code=200)
 
 
 @app.route('/get_average_polaritys', methods=['GET'])
+@jwt_required
 def get_average_polaritys():
-    average_polaritys = db.get_users_average_polarityes()
+    client_name = get_jwt_identity()
+    average_polaritys = db.get_users_average_polarityes(client_name=client_name)
     return resp(
         data={'status': 'ok', 'polaritys': average_polaritys},
         code=200)

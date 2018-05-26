@@ -9,14 +9,17 @@ class Clients:
         self.clients = dbworker.get_clients_collection()
 
     def registration(self, client_name, password):
-        hash_pass = hash_functions.get_hash(password)
-        new_client = {'client_name': client_name, 'password': hash_pass}
-        try:
-            self.clients.insert_one(new_client)
-        except Exception as e:
-            print('error in add to mongo: {}'.format(str(e)))
-            return('Registration error')
-        return(None)
+        if self.clients.find_one({'client_name': client_name}):
+            return('Client name is not unique')
+        else: 
+            hash_pass = hash_functions.get_hash(password)
+            new_client = {'client_name': client_name, 'password': hash_pass}
+            try:
+                self.clients.insert_one(new_client)
+            except Exception as e:
+                print('error in add to mongo: {}'.format(str(e)))
+                return('Registration error')
+            return(None)
 
     def get_client_by_name(self, client_name):
         client_cursor = self.clients.find_one({'client_name': client_name})
