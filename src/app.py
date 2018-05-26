@@ -38,6 +38,13 @@ else:
     MONGODB_PORT = 27017
 MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'tmdata')
 
+print('SA_SERVICE_HOST: {}'.format(SA_SERVICE_HOST))
+print('SA_SERVICE_PORT: {}'.format(SA_SERVICE_PORT))
+print('TM_SERVICE_HOST: {}'.format(TM_SERVICE_HOST))
+print('TM_SERVICE_PORT: {}'.format(TM_SERVICE_PORT))
+print('MONGODB_HOST: {}'.format(MONGODB_HOST))
+print('MONGODB_PORT: {}'.format(MONGODB_PORT))
+
 db = DBWorker(MONGODB_HOST, MONGODB_PORT, 'taskmaster')
 clients = Clients(db)
 startTime = datetime.now()

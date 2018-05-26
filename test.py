@@ -8,7 +8,7 @@ class TestAPI(unittest.TestCase):
 
     def test_tm_service_get_themes(self):
         print('test_tm_service_get_themes')
-        tm = ThematicModeller(host='188.166.115.138', port=32356)
+        tm = ThematicModeller(host='188.166.115.138', port=30962)
         text = 'A video game is an electronic game that involves '\
             'interaction with a user interface to generate visual '\
             'feedback on a video device such as a TV screen or computer '\
@@ -28,7 +28,7 @@ class TestAPI(unittest.TestCase):
 
     def test_tm_service_get_theme_words(self):
         print('test_tm_service_get_theme_words')
-        tm = ThematicModeller(host='188.166.115.138', port=32356)
+        tm = ThematicModeller(host='188.166.115.138', port=30962)
         words_info = tm.get_theme_words(36)
         words = []
         for pair in words_info:
@@ -54,7 +54,7 @@ class TestAPI(unittest.TestCase):
 
     def test_db_worker_update_user_prefrence(self):
         print('test_db_worker_update_user_prefrence')
-        db = DBWorker(host='localhost', port=27017, database_name='taskmaster')
+        db = DBWorker(host='188.166.115.138', port=31178, database_name='tm_test')
         db.clean_database()
         themes1 = [
             {
@@ -96,7 +96,7 @@ class TestAPI(unittest.TestCase):
 
     def test_db_worker_count_user_assesments(self):
         print('test_db_worker_count_user_assesments')
-        db = DBWorker(host='localhost', port=27017, database_name='taskmaster')
+        db = DBWorker(host='188.166.115.138', port=31178, database_name='tm_test')
         db.clean_database()
         themes3 = [
             {
@@ -135,7 +135,7 @@ class TestAPI(unittest.TestCase):
 
     def test_db_worker_get_users_assesments(self):
         print('test_db_worker_get_users_assesments')
-        db = DBWorker(host='localhost', port=27017, database_name='taskmaster')
+        db = DBWorker(host='188.166.115.138', port=31178, database_name='tm_test')
         db.clean_database()
         themes1 = [
             {
@@ -189,7 +189,7 @@ class TestAPI(unittest.TestCase):
 
     def test_db_worker_predictions(self):
         print('test_db_worker_predictions')
-        db = DBWorker(host='localhost', port=27017, database_name='taskmaster')
+        db = DBWorker(host='188.166.115.138', port=31178, database_name='tm_test')
         db.clean_database()
         themes1 = [
             {
@@ -235,7 +235,7 @@ class TestAPI(unittest.TestCase):
 
     def test_db_worker_get_average_polarity(self):
         print('test_db_worker_get_average_polarity')
-        db = DBWorker(host='localhost', port=27017, database_name='taskmaster')
+        db = DBWorker(host='188.166.115.138', port=31178, database_name='tm_test')
         db.clean_database()
         db.add_new_post(
             post_id=1,
@@ -270,7 +270,7 @@ class TestAPI(unittest.TestCase):
         self.assertEqual(avg_polarity, 1.0)
 
     def test_db_worker_get_users_average_polaritys(self):
-        db = DBWorker(host='localhost', port=27017, database_name='taskmaster')
+        db = DBWorker(host='188.166.115.138', port=31178, database_name='tm_test')
         db.clean_database()
         db.add_new_post(
             post_id=1,
