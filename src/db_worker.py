@@ -82,15 +82,25 @@ class DBWorker(object):
                     'theme_assesments': [theme['theme_assesment']]
                 })
             self.add_new_user(user_id=user_id, themes=themes, client_name=client_name)
-
         else:
             user_themes = user['themes']
             for n_theme in normalized_themes:
+                
+                # check if new theme is in old themes list
+                themes_coincidented = False
                 for u_theme in user_themes:
                     if u_theme['theme_number'] == n_theme['theme_number']:
+                        themes_coincidented = True
                         u_theme['theme_assesments'].append(
                             n_theme['theme_assesment']
                         )
+                if not themes_coincidented:
+                    user_themes.append(
+                        {
+                            'theme_number': n_theme['theme_number'],
+                            'theme_assesments': [n_theme['theme_assesment']]
+                        }
+                    )
             self.update_user(user_id, user_themes, client_name)
 
     def add_new_post(self, post_id, post_themes, client_name):
